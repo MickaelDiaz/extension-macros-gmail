@@ -39,26 +39,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
 // ====================================================================
-// B. LOGIQUE D'INJECTION (MODIFIÉE POUR VÉRIFICATION)
+// B. LOGIQUE D'INJECTION (Mise à jour pour état actif)
 // ====================================================================
 
 function injectMacros(macros) {
-    // 1. Cible d'injection stable
     const targetContainer = document.querySelector('.n3');
 
-    // SI la cible n'existe pas ENCORE, ne rien faire. L'observer rappellera cette fonction.
-    if (!targetContainer) {
-        return;
-    }
+    if (!targetContainer) return;
+    if (document.getElementById('macro-container-gmail')) return;
 
-    // SI le menu est DÉJÀ là, ne rien faire.
-    if (document.getElementById('macro-container-gmail')) {
-        return;
+    // --- 💡 Ajout des styles pour l'état ACTIF permanent ---
+    const styleId = 'macro-custom-styles';
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            /* Feedback de Clic (1 sec) */
+            .macro-active-feedback {
+                background-color: #d2e3fc !important;
+                border-left: 3px solid #1a73e8; 
+                padding-left: 23px !important; 
+                transition: background-color 0.1s, border-left 0.1s;
+            }
+            
+            /* 💡 NOUVEAU: État Actif Permanent (mimique Gmail) */
+            .macro-active-state {
+                background-color: #e8f0fe !important; /* Fond bleu clair Gmail */
+                font-weight: bold !important;
+                color: #1967d2 !important; /* Texte bleu Gmail */
+            }
+        `;
+        document.head.appendChild(style);
     }
+    // --- Fin des styles ---
 
-    // 2. Conteneur principal
     const container = document.createElement('div');
     container.id = 'macro-container-gmail';
+    // ... (Styles du conteneur inchangés) ...
     container.style.cssText = `
         margin-top: 10px;
         padding-top: 10px;
@@ -66,27 +83,31 @@ function injectMacros(macros) {
         display: block;
     `;
 
-    // 3. Titre
+    // 3. Titre (Inchangé)
     const heading = document.createElement('div');
     heading.textContent = '🔍 Macros';
-    heading.className = 'n0'; // Utilise la classe de Gmail pour le thème
-    heading.style.cssText = `
-        padding: 4px 0px 4px 26px;
-        font-size: 14px;
-        font-weight: bold;
-        margin-bottom: 2px;
-        text-transform: uppercase;
-    `;
+    // ... (Styles du titre inchangés) ...
     container.appendChild(heading);
 
     // 4. Liens de macro
-    for (const name in macros) {
-        const query = macros[name];
+    macros.forEach(macro => {
+        const name = macro.name;
+        const query = macro.query;
+        if (!name || !query) return;
+
         const macroItem = document.createElement('div');
         macroItem.textContent = name;
         macroItem.title = query;
+
+        // 💡 NOUVEAU: Ajoute un attribut 'data-query' pour l'identification
+        macroItem.dataset.query = query;
+
+        // ... (Styles et gestion du survol inchangés) ...
+        // ... (Gestion du clic (Feedback) inchangée) ...
+
         const defaultBG = 'transparent';
         const hoverBG = '#f1f3f4';
+
         macroItem.style.cssText = `
             padding: 4px 0px 4px 26px;
             cursor: pointer;
@@ -98,64 +119,116 @@ function injectMacros(macros) {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            border-left: 3px solid transparent; 
+            padding-left: 26px; 
         `;
-        macroItem.addEventListener('mouseover', () => { macroItem.style.backgroundColor = hoverBG; });
-        macroItem.addEventListener('mouseout', () => { macroItem.style.backgroundColor = defaultBG; });
+
+        macroItem.addEventListener('mouseover', () => {
+            if (!macroItem.classList.contains('macro-active-state')) {
+                macroItem.style.backgroundColor = hoverBG;
+            }
+        });
+        macroItem.addEventListener('mouseout', () => {
+            if (!macroItem.classList.contains('macro-active-state')) {
+                macroItem.style.backgroundColor = defaultBG;
+            }
+        });
+
         macroItem.addEventListener('click', () => {
+            // Feedback Visuel (1 sec)
+            macroItem.classList.add('macro-active-feedback');
+            setTimeout(() => {
+                macroItem.classList.remove('macro-active-feedback');
+            }, 1000);
+
+            // Exécution
             const result = executerMacro(query);
             if (result.status === "error") {
                 console.error(result.message);
             }
         });
-        container.appendChild(macroItem);
-    }
 
-    // Injection à la fin du conteneur de navigation
+        container.appendChild(macroItem);
+    });
+
     targetContainer.appendChild(container);
     console.log("Menu des macros injecté/ré-injecté.");
 }
 
 // ====================================================================
-// C. INITIALISATION (CORRECTION MAJEURE POUR LA PERSISTANCE)
+// C. INITIALISATION (Mise à jour pour état actif)
 // ====================================================================
 
-let savedMacros = {}; // Stocke les macros localement
+// 💡 NOUVEAU: Fonction pour synchroniser l'URL avec le style
+function updateActiveMacroHighlight() {
+    let currentQuery = null;
 
-// 1. Récupérer les macros une première fois
-chrome.storage.sync.get({ macros: {} }, (data) => {
-    if (Object.keys(data.macros).length > 0) {
+    // 1. Vérifie si l'URL actuelle est une recherche
+    if (window.location.hash.startsWith('#search/')) {
+        // Extrait la requête de l'URL (ex: #search/label%3Afactures)
+        currentQuery = decodeURIComponent(window.location.hash.substring(8)); // 8 = longueur de '#search/'
+    }
+
+    // 2. Réinitialise d'abord TOUTES les macros
+    const allMacroItems = document.querySelectorAll('#macro-container-gmail [data-query]');
+    allMacroItems.forEach(item => {
+        item.classList.remove('macro-active-state');
+        item.style.backgroundColor = 'transparent'; // Réinitialise le fond du survol
+    });
+
+    // 3. Applique l'état actif si une correspondance est trouvée
+    if (currentQuery) {
+        try {
+            // CSS.escape est vital si la requête contient des guillemets ou des caractères spéciaux
+            const activeElement = document.querySelector(
+                `#macro-container-gmail [data-query="${CSS.escape(currentQuery)}"]`
+            );
+            if (activeElement) {
+                activeElement.classList.add('macro-active-state');
+            }
+        } catch (e) {
+            console.error("Erreur lors de la sélection de la macro active (probablement des caractères spéciaux):", e);
+        }
+    }
+}
+
+
+let savedMacros = [];
+
+// 1. Récupérer les macros (Inchangé)
+chrome.storage.sync.get({ macros: [] }, (data) => {
+    if (data.macros.length > 0) {
         savedMacros = data.macros;
-        // Tenter une injection immédiate (au cas où la page est déjà chargée)
+        savedMacros.sort((a, b) => (a.priority || 99) - (b.priority || 99));
         injectMacros(savedMacros);
     }
 });
 
-// 2. Écouter les changements de stockage (si l'utilisateur ajoute/supprime une macro)
+// 2. Écouter les changements de stockage (Inchangé)
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync' && changes.macros) {
-        // Mettre à jour les macros en mémoire
-        savedMacros = changes.macros.newValue || {};
+        savedMacros = changes.macros.newValue || [];
+        savedMacros.sort((a, b) => (a.priority || 99) - (b.priority || 99));
 
-        // Supprimer l'ancienne liste pour forcer la ré-injection
         const existingContainer = document.getElementById('macro-container-gmail');
         if (existingContainer) {
             existingContainer.remove();
         }
 
-        // Tenter de ré-injecter immédiatement avec les nouvelles données
         injectMacros(savedMacros);
     }
 });
 
-// 3. ✨ L'OBSERVATEUR PERSISTANT ✨
-// C'est lui qui gère la disparition/ré-apparition
+// 3. L'OBSERVATEUR PERSISTANT (Mis à jour)
 const observer = new MutationObserver((mutationsList, observer) => {
-    // À CHAQUE modification du DOM (navigation, etc.),
-    // on vérifie si l'injection est nécessaire.
-    // La fonction injectMacros() contient la logique pour ne pas
-    // injecter si c'est déjà fait.
+    savedMacros.sort((a, b) => (a.priority || 99) - (b.priority || 99));
     injectMacros(savedMacros);
+
+    // 💡 NOUVEAU: Mettre à jour le surlignage après chaque injection/re-rendu
+    updateActiveMacroHighlight();
 });
 
-// Lance l'observation sur TOUTE la page, et ne s'arrête JAMAIS.
 observer.observe(document.body, { childList: true, subtree: true });
+
+// 💡 NOUVEAU: Écouter les changements d'URL (clics sur "Boîte de réception", etc.)
+window.addEventListener('hashchange', updateActiveMacroHighlight);
