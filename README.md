@@ -1,4 +1,4 @@
-# 🚀 Gmail Search Macro Injector
+# 🚀 Macros de Recherche Gmail
 
 Ce projet est une extension Chrome minimaliste créée pour une seule chose : vous faire gagner du temps sur Gmail.
 
