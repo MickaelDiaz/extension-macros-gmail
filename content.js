@@ -86,7 +86,16 @@ function injectMacros(macros) {
     // 3. Titre (Inchangé)
     const heading = document.createElement('div');
     heading.textContent = '🔍 Macros';
-    // ... (Styles du titre inchangés) ...
+    //
+    heading.className = 'n0'; // Utilise la classe de Gmail pour le thème
+    heading.style.cssText = `
+        padding: 4px 0px 4px 26px;
+        font-size: 14px;
+        font-weight: bold; 
+        margin-bottom: 2px;
+        text-transform: uppercase;
+    `;
+    //
     container.appendChild(heading);
 
     // 4. Liens de macro
