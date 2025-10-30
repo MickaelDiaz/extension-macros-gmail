@@ -3,68 +3,136 @@
 
 <head>
   <title>Macros Gmail</title>
+  <meta charset="UTF-8">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      width: 300px;
-      padding: 10px;
+      font-family: 'Roboto', Arial, sans-serif;
+      /* Police moderne */
+      width: 350px;
+      /* Légèrement plus large pour l'ergonomie */
+      padding: 15px;
+      background-color: #f7f7f7;
+      /* Fond clair */
+      color: #333;
     }
 
     h3 {
       margin-top: 0;
+      color: #1a73e8;
+      /* Bleu Google */
+      font-weight: 500;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 5px;
+    }
+
+    /* Styles pour le formulaire de création */
+    #new-macro-section {
+      padding-bottom: 15px;
     }
 
     input {
-      width: 95%;
-      margin-bottom: 5px;
+      width: 100%;
+      box-sizing: border-box;
+      /* Inclusion du padding dans la largeur */
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
     }
 
-    button {
-      background-color: #4285F4;
+    /* Style du bouton "Enregistrer" */
+    #save-button {
+      width: 100%;
+      background-color: #1a73e8;
       color: white;
       border: none;
-      padding: 8px 12px;
+      padding: 10px;
       cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background-color 0.2s;
     }
 
-    button:hover {
-      background-color: #357ae8;
+    #save-button:hover {
+      background-color: #155bb5;
     }
 
+    hr {
+      border: 0;
+      height: 1px;
+      background-color: #ddd;
+      margin: 15px 0;
+    }
+
+    /* Styles pour la liste des macros */
     #macros-list {
-      margin-top: 15px;
+      margin-top: 10px;
     }
 
     .macro-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 5px;
+      padding: 8px 0;
       border-bottom: 1px solid #eee;
     }
 
-    .macro-name {
-      font-weight: bold;
-      cursor: pointer;
+    .macro-item:last-child {
+      border-bottom: none;
     }
 
+    .macro-name {
+      font-weight: 500;
+      color: #3c4043;
+      cursor: pointer;
+      flex-grow: 1;
+      /* Permet au nom de prendre l'espace */
+      padding-right: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .macro-name:hover {
+      color: #1a73e8;
+    }
+
+    /* Style du bouton "Supprimer" */
     .delete-btn {
-      background-color: #db4437;
+      background-color: #ea4335;
+      /* Rouge vif pour l'action de suppression */
+      color: white;
+      border: none;
       font-size: 10px;
-      padding: 3px 6px;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      line-height: 1;
+      transition: background-color 0.2s;
+    }
+
+    .delete-btn:hover {
+      background-color: #d13022;
     }
   </style>
 </head>
 
 <body>
-  <h3>Nouvelle Macro</h3>
-  <input type="text" id="macro-name" placeholder="Nom de la macro (ex: Factures)">
-  <input type="text" id="macro-query" placeholder="Requête de recherche (ex: from:paypal subject:facture)">
-  <button id="save-button">Enregistrer</button>
+  <div id="new-macro-section">
+    <h3>Nouvelle Macro</h3>
+    <input type="text" id="macro-name" placeholder="Nom de la macro (ex: Factures 🧾)">
+    <input type="text" id="macro-query" placeholder="Requête (ex: from:paypal subject:facture)">
+    <button id="save-button">Enregistrer la Macro</button>
+  </div>
 
   <hr>
+
   <h3>Macros Enregistrées</h3>
   <div id="macros-list">
+    <div class="macro-item" style="justify-content: center; color: #777;">
+      Aucune macro enregistrée.
+    </div>
   </div>
 
   <script src="popup.js"></script>
