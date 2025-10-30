@@ -1,5 +1,4 @@
 # 🚀 Macros de Recherche Gmail
-
 Ce projet est une extension Chrome minimaliste créée pour une seule chose : vous faire gagner du temps sur Gmail.
 
 Plutôt que de mémoriser et de taper des opérateurs de recherche avancée, ce script vous permet de les sauvegarder en tant que "macros" accessibles directement depuis la barre de navigation de gauche.
