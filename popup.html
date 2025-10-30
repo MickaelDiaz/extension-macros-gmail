@@ -115,12 +115,65 @@
     .delete-btn:hover {
       background-color: #d13022;
     }
+
+    /* Styles pour les messages de confirmation */
+    .status-message {
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .status-message.success {
+      background-color: #e6f4ea;
+      /* Vert très clair */
+      color: #1e873a;
+      /* Texte vert foncé */
+    }
+
+    .status-message.error {
+      background-color: #fce8e6;
+      /* Rouge très clair */
+      color: #d93025;
+      /* Texte rouge foncé */
+    }
+
+    .status-message.info {
+      background-color: #e8f0fe;
+      /* Bleu très clair */
+      color: #1a73e8;
+      /* Texte bleu foncé */
+    }
+
+    /* Styles pour les nouveaux boutons dans la liste */
+    .macro-controls button {
+      font-size: 11px;
+      padding: 3px 6px;
+      margin-left: 5px;
+      min-width: 60px;
+      /* Taille uniforme */
+      line-height: 1;
+    }
+
+    .edit-btn {
+      background-color: #fbbc04;
+      /* Jaune/Or pour Modifier */
+      color: #333;
+      border: 1px solid #fbbc04;
+    }
+
+    .edit-btn:hover {
+      background-color: #e3a800;
+    }
   </style>
 </head>
 
 <body>
   <div id="new-macro-section">
     <h3>Nouvelle Macro</h3>
+    <div id="status-message" class="status-message" style="display: none;"></div>
     <input type="text" id="macro-name" placeholder="Nom de la macro (ex: Factures 🧾)">
     <input type="text" id="macro-query" placeholder="Requête (ex: from:paypal subject:facture)">
     <button id="save-button">Enregistrer la Macro</button>
