@@ -167,6 +167,14 @@
     .edit-btn:hover {
       background-color: #e3a800;
     }
+
+    .helper-text {
+      font-size: 11px;
+      color: #5f6368;
+      text-align: center;
+      margin: -5px 0 10px 0;
+      /* Se place juste sous le champ du nom */
+    }
   </style>
 </head>
 
@@ -174,7 +182,12 @@
   <div id="new-macro-section">
     <h3>Nouvelle Macro</h3>
     <div id="status-message" class="status-message" style="display: none;"></div>
-    <input type="text" id="macro-name" placeholder="Nom de la macro (ex: Factures 🧾)">
+
+    <input type="text" id="macro-name" placeholder="Nom de la macro (ex: Factures)">
+
+    <p class="helper-text">Astuce : <strong>Win + .</strong> (Windows) ou <strong>Cmd + Ctrl + Espace</strong> (Mac)
+      pour les émojis.</p>
+
     <input type="text" id="macro-query" placeholder="Requête (ex: from:paypal subject:facture)">
     <button id="save-button">Enregistrer la Macro</button>
   </div>
@@ -183,9 +196,6 @@
 
   <h3>Macros Enregistrées</h3>
   <div id="macros-list">
-    <div class="macro-item" style="justify-content: center; color: #777;">
-      Aucune macro enregistrée.
-    </div>
   </div>
 
   <script src="popup.js"></script>
